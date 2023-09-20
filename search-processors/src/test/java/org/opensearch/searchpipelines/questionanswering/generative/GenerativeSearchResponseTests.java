@@ -41,7 +41,7 @@ public class GenerativeSearchResponseTests extends OpenSearchTestCase {
         String answer = "answer";
         SearchResponseSections internal = new SearchResponseSections(new SearchHits(new SearchHit[0], null, 0), null, null, false, false, null, 0);
         GenerativeSearchResponse searchResponse = new GenerativeSearchResponse(answer, internal, null, 0, 0, 0, 0, new ShardSearchFailure[0],
-            SearchResponse.Clusters.EMPTY);
+            SearchResponse.Clusters.EMPTY, "iid");
         XContent xc = mock(XContent.class);
         OutputStream os = mock(OutputStream.class);
         XContentGenerator generator = mock(XContentGenerator.class);

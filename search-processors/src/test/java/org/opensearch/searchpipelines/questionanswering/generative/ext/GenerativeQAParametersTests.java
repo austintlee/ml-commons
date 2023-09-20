@@ -36,7 +36,7 @@ import static org.mockito.Mockito.*;
 public class GenerativeQAParametersTests extends OpenSearchTestCase {
 
     public void testGenerativeQAParameters() {
-        GenerativeQAParameters params = new GenerativeQAParameters("conversation_id", "llm_model", "llm_question");
+        GenerativeQAParameters params = new GenerativeQAParameters("conversation_id", "llm_model", "llm_question", null);
         GenerativeQAParamExtBuilder extBuilder = new GenerativeQAParamExtBuilder();
         extBuilder.setParams(params);
         SearchSourceBuilder srcBulder = SearchSourceBuilder.searchSource().ext(List.of(extBuilder));
@@ -87,7 +87,7 @@ public class GenerativeQAParametersTests extends OpenSearchTestCase {
         String conversationId = "a";
         String llmModel = "b";
         String llmQuestion = "c";
-        GenerativeQAParameters parameters = new GenerativeQAParameters(conversationId, llmModel, llmQuestion);
+        GenerativeQAParameters parameters = new GenerativeQAParameters(conversationId, llmModel, llmQuestion, null);
         StreamOutput output = new DummyStreamOutput();
         parameters.writeTo(output);
         List<String> actual = ((DummyStreamOutput) output).getList();
@@ -101,20 +101,20 @@ public class GenerativeQAParametersTests extends OpenSearchTestCase {
         String conversationId = "a";
         String llmModel = "b";
         String llmQuestion = "c";
-        GenerativeQAParameters parameters = new GenerativeQAParameters(conversationId, llmModel, llmQuestion);
+        GenerativeQAParameters parameters = new GenerativeQAParameters(conversationId, llmModel, llmQuestion, null);
         assertNotEquals(parameters, null);
         assertNotEquals(parameters, "foo");
-        assertEquals(parameters, new GenerativeQAParameters(conversationId, llmModel, llmQuestion));
-        assertNotEquals(parameters, new GenerativeQAParameters("", llmModel, llmQuestion));
-        assertNotEquals(parameters, new GenerativeQAParameters(conversationId, "", llmQuestion));
-        assertNotEquals(parameters, new GenerativeQAParameters(conversationId, llmModel, ""));
+        assertEquals(parameters, new GenerativeQAParameters(conversationId, llmModel, llmQuestion, null));
+        assertNotEquals(parameters, new GenerativeQAParameters("", llmModel, llmQuestion, null));
+        assertNotEquals(parameters, new GenerativeQAParameters(conversationId, "", llmQuestion, null));
+        //assertNotEquals(parameters, new GenerativeQAParameters(conversationId, llmModel, "", null));
     }
 
     public void testToXConent() throws IOException {
         String conversationId = "a";
         String llmModel = "b";
         String llmQuestion = "c";
-        GenerativeQAParameters parameters = new GenerativeQAParameters(conversationId, llmModel, llmQuestion);
+        GenerativeQAParameters parameters = new GenerativeQAParameters(conversationId, llmModel, llmQuestion, null);
         XContent xc = mock(XContent.class);
         OutputStream os = mock(OutputStream.class);
         XContentGenerator generator = mock(XContentGenerator.class);

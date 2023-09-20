@@ -17,7 +17,6 @@
  */
 package org.opensearch.searchpipelines.questionanswering.generative;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import lombok.Getter;
 import lombok.Setter;
@@ -41,6 +40,8 @@ import org.opensearch.searchpipelines.questionanswering.generative.llm.LlmIOUtil
 import org.opensearch.searchpipelines.questionanswering.generative.llm.ModelLocator;
 import org.opensearch.searchpipelines.questionanswering.generative.prompt.PromptUtil;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -95,20 +96,40 @@ public class GenerativeQAResponseProcessor extends AbstractProcessor implements 
         GenerativeQAParameters params = GenerativeQAParamUtil.getGenerativeQAParameters(request);
         String llmQuestion = params.getLlmQuestion();
         String llmModel = params.getLlmModel() == null ? this.llmModel : params.getLlmModel();
+        if (llmModel == null) {
+            throw new IllegalArgumentException("llm_model cannot be null.");
+        }
         String conversationId = params.getConversationId();
         log.info("LLM question: {}, LLM model {}, conversation id: {}", llmQuestion, llmModel, conversationId);
+        Instant start = Instant.now();
         List<Interaction> chatHistory = (conversationId == null) ? Collections.emptyList() : memoryClient.getInteractions(conversationId, DEFAULT_CHAT_HISTORY_WINDOW);
-        List<String> searchResults = getSearchResults(response);
+        log.info("Retrieved chat history. ({})", getDuration(start));
+
+        Integer topN = params.getContextSize();
+        if (topN == null) {
+            topN = GenerativeQAParameters.CONTEXT_SIZE_NULL_VALUE;
+        }
+        List<String> searchResults = getSearchResults(response, topN);
+
+        start = Instant.now();
         ChatCompletionOutput output = llm.doChatCompletion(LlmIOUtil.createChatCompletionInput(llmModel, llmQuestion, chatHistory, searchResults));
+        log.info("doChatCompletion complete. ({})", getDuration(start));
+
         String answer = (String) output.getAnswers().get(0);
 
         String interactionId = null;
         if (conversationId != null) {
+            start = Instant.now();
             interactionId = memoryClient.createInteraction(conversationId, llmQuestion, PromptUtil.DEFAULT_CHAT_COMPLETION_PROMPT_TEMPLATE, answer,
                 GenerativeQAProcessorConstants.RESPONSE_PROCESSOR_TYPE, jsonArrayToString(searchResults));
+            log.info("Created a new interaction: {} ({})", interactionId, getDuration(start));
         }
 
         return insertAnswer(response, answer, interactionId);
+    }
+
+    long getDuration(Instant start) {
+        return Duration.between(start, Instant.now()).toMillis();
     }
 
     @Override
@@ -121,17 +142,20 @@ public class GenerativeQAResponseProcessor extends AbstractProcessor implements 
         // TODO return the interaction id in the response.
 
         return new GenerativeSearchResponse(answer, response.getInternalResponse(), response.getScrollId(), response.getTotalShards(), response.getSuccessfulShards(),
-            response.getSkippedShards(), response.getSuccessfulShards(), response.getShardFailures(), response.getClusters());
+            response.getSkippedShards(), response.getSuccessfulShards(), response.getShardFailures(), response.getClusters(), interactionId);
     }
 
-    private List<String> getSearchResults(SearchResponse response) {
+    private List<String> getSearchResults(SearchResponse response, Integer topN) {
         List<String> searchResults = new ArrayList<>();
-        for (SearchHit hit : response.getHits().getHits()) {
-            Map<String, Object> docSourceMap = hit.getSourceAsMap();
+        SearchHit[] hits = response.getHits().getHits();
+        int total = hits.length;
+        int end = (topN != GenerativeQAParameters.CONTEXT_SIZE_NULL_VALUE) ? Math.min(topN, total) : total;
+        for (int i = 0; i < end; i++) {
+            Map<String, Object> docSourceMap = hits[i].getSourceAsMap();
             for (String contextField : contextFields) {
                 Object context = docSourceMap.get(contextField);
                 if (context == null) {
-                    log.error("Context " + contextField + " not found in search hit " + hit);
+                    log.error("Context " + contextField + " not found in search hit " + hits[i]);
                     // TODO throw a more meaningful error here?
                     throw new RuntimeException();
                 }

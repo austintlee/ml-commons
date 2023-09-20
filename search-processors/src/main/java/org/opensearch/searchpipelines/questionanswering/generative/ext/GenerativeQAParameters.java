@@ -22,6 +22,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.opensearch.common.recycler.Recycler;
+import org.opensearch.core.common.Strings;
 import org.opensearch.core.common.io.stream.StreamInput;
 import org.opensearch.core.common.io.stream.StreamOutput;
 import org.opensearch.core.common.io.stream.Writeable;
@@ -30,6 +32,8 @@ import org.opensearch.core.xcontent.ObjectParser;
 import org.opensearch.core.xcontent.ToXContentObject;
 import org.opensearch.core.xcontent.XContentBuilder;
 import org.opensearch.core.xcontent.XContentParser;
+import org.opensearch.ml.common.conversation.Interaction;
+import org.opensearch.ml.common.utils.StringUtils;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -38,7 +42,7 @@ import java.util.Objects;
  * Defines parameters for generative QA search pipelines.
  *
  */
-@AllArgsConstructor
+
 @NoArgsConstructor
 public class GenerativeQAParameters implements Writeable, ToXContentObject {
 
@@ -47,12 +51,16 @@ public class GenerativeQAParameters implements Writeable, ToXContentObject {
     private static final ParseField CONVERSATION_ID = new ParseField("conversation_id");
     private static final ParseField LLM_MODEL = new ParseField("llm_model");
     private static final ParseField LLM_QUESTION = new ParseField("llm_question");
+    private static final ParseField CONTEXT_SIZE = new ParseField("context_size");
+
+    public static final int CONTEXT_SIZE_NULL_VALUE = -1;
 
     static {
         PARSER = new ObjectParser<>("generative_qa_parameters", GenerativeQAParameters::new);
         PARSER.declareString(GenerativeQAParameters::setConversationId, CONVERSATION_ID);
         PARSER.declareString(GenerativeQAParameters::setLlmModel, LLM_MODEL);
         PARSER.declareString(GenerativeQAParameters::setLlmQuestion, LLM_QUESTION);
+        PARSER.declareIntOrNull(GenerativeQAParameters::setContextSize, CONTEXT_SIZE_NULL_VALUE, CONTEXT_SIZE);
     }
 
     @Setter
@@ -67,17 +75,34 @@ public class GenerativeQAParameters implements Writeable, ToXContentObject {
     @Getter
     private String llmQuestion;
 
+    @Setter
+    @Getter
+    private Integer contextSize;
+
+    public GenerativeQAParameters(String conversationId, String llmModel, String llmQuestion, Integer contextSize) {
+        this.conversationId = conversationId;
+        this.llmModel = llmModel;
+
+        // TODO: keep this requirement until we can extract the question from the query or from the request processor parameters
+        //       for question rewriting.
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(llmQuestion), LLM_QUESTION.getPreferredName() + " must be provided.");
+        this.llmQuestion = llmQuestion;
+        this.contextSize = (contextSize == null) ? CONTEXT_SIZE_NULL_VALUE : contextSize;
+    }
+
     public GenerativeQAParameters(StreamInput input) throws IOException {
         this.conversationId = input.readOptionalString();
         this.llmModel = input.readOptionalString();
         this.llmQuestion = input.readString();
+        this.contextSize = input.readInt();
     }
 
     @Override
     public XContentBuilder toXContent(XContentBuilder xContentBuilder, Params params) throws IOException {
         return xContentBuilder.field(CONVERSATION_ID.getPreferredName(), this.conversationId)
             .field(LLM_MODEL.getPreferredName(), this.llmModel)
-            .field(LLM_QUESTION.getPreferredName(), this.llmQuestion);
+            .field(LLM_QUESTION.getPreferredName(), this.llmQuestion)
+            .field(CONTEXT_SIZE.getPreferredName(), this.contextSize);
     }
 
     @Override
@@ -87,6 +112,7 @@ public class GenerativeQAParameters implements Writeable, ToXContentObject {
 
         Preconditions.checkNotNull(llmQuestion, "llm_question must not be null.");
         out.writeString(llmQuestion);
+        out.writeInt(contextSize);
     }
 
     public static GenerativeQAParameters parse(XContentParser parser) throws IOException {
@@ -105,6 +131,7 @@ public class GenerativeQAParameters implements Writeable, ToXContentObject {
         GenerativeQAParameters other = (GenerativeQAParameters) o;
         return Objects.equals(this.conversationId, other.getConversationId())
             && Objects.equals(this.llmModel, other.getLlmModel())
-            && Objects.equals(this.llmQuestion, other.getLlmQuestion());
+            && Objects.equals(this.llmQuestion, other.getLlmQuestion())
+            && (this.contextSize == other.getContextSize());
     }
 }

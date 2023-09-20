@@ -17,25 +17,19 @@
  */
 package org.opensearch.searchpipelines.questionanswering.generative.llm;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-import org.opensearch.client.Client;
+import java.util.List;
+import java.util.Random;
 
-/**
- * Helper class for wiring LLMs based on the model ID.
- *
- * TODO Should we extend this use case beyond HttpConnectors/Remote Inference?
- */
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class ModelLocator {
+public class LocalLlm implements Llm {
+    @Override
+    public ChatCompletionOutput doChatCompletion(ChatCompletionInput input) {
 
-    public static Llm getLlm(String modelId, Client client) {
-
-        if (modelId.startsWith("local/")) {
-            return new LocalLlm();
+        long delay = (long) Math.floor(1000 * (4.0 + ((0.001 + new Random().nextFloat()) * 2 - 1)));
+        try {
+            Thread.sleep(delay);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
-
-        return new DefaultLlmImpl(modelId, client);
+        return new ChatCompletionOutput(List.of("This is a dummy answer."));
     }
-
 }
