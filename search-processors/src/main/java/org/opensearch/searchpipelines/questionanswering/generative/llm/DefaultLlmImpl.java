@@ -75,7 +75,8 @@ public class DefaultLlmImpl implements Llm {
 
         Map<String, String> inputParameters = new HashMap<>();
         inputParameters.put(CONNECTOR_INPUT_PARAMETER_MODEL, chatCompletionInput.getModel());
-        String messages = PromptUtil.getChatCompletionPrompt(chatCompletionInput.getQuestion(), chatCompletionInput.getChatHistory(), chatCompletionInput.getContexts());
+        String messages = PromptUtil.getChatCompletionPrompt(chatCompletionInput.getSystemPrompt(), chatCompletionInput.getUserInstructions(),
+            chatCompletionInput.getQuestion(), chatCompletionInput.getChatHistory(), chatCompletionInput.getContexts());
         inputParameters.put(CONNECTOR_INPUT_PARAMETER_MESSAGES, messages);
         log.info("Messages to LLM: {}", messages);
         MLInputDataset dataset = RemoteInferenceInputDataSet.builder().parameters(inputParameters).build();

@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BooleanSupplier;
 
 import static org.opensearch.ingest.ConfigurationUtils.newConfigurationException;
@@ -66,6 +67,9 @@ public class GenerativeQAResponseProcessor extends AbstractProcessor implements 
     private final String llmModel;
     private final List<String> contextFields;
 
+    private final String systemPrompt;
+    private final String userInstructions;
+
     @Setter
     private ConversationalMemoryClient memoryClient;
 
@@ -77,10 +81,12 @@ public class GenerativeQAResponseProcessor extends AbstractProcessor implements 
     private final BooleanSupplier featureFlagSupplier;
 
     protected GenerativeQAResponseProcessor(Client client, String tag, String description, boolean ignoreFailure,
-        Llm llm, String llmModel, List<String> contextFields, BooleanSupplier supplier) {
+        Llm llm, String llmModel, List<String> contextFields, String systemPrompt, String userInstructions, BooleanSupplier supplier) {
         super(tag, description, ignoreFailure);
         this.llmModel = llmModel;
         this.contextFields = contextFields;
+        this.systemPrompt = systemPrompt;
+        this.userInstructions = userInstructions;
         this.llm = llm;
         this.memoryClient = new ConversationalMemoryClient(client);
         this.featureFlagSupplier = supplier;
@@ -125,8 +131,11 @@ public class GenerativeQAResponseProcessor extends AbstractProcessor implements 
         }
         List<String> searchResults = getSearchResults(response, topN);
 
+        log.info("system_prompt: {}", systemPrompt);
+        log.info("user_instructions: {}", userInstructions);
         start = Instant.now();
-        ChatCompletionOutput output = llm.doChatCompletion(LlmIOUtil.createChatCompletionInput(llmModel, llmQuestion, chatHistory, searchResults, timeout));
+        ChatCompletionOutput output = llm.doChatCompletion(LlmIOUtil.createChatCompletionInput(systemPrompt, userInstructions, llmModel,
+            llmQuestion, chatHistory, searchResults, timeout));
         log.info("doChatCompletion complete. ({})", getDuration(start));
 
         String answer = (String) output.getAnswers().get(0);
@@ -134,7 +143,7 @@ public class GenerativeQAResponseProcessor extends AbstractProcessor implements 
         String interactionId = null;
         if (conversationId != null) {
             start = Instant.now();
-            interactionId = memoryClient.createInteraction(conversationId, llmQuestion, PromptUtil.DEFAULT_CHAT_COMPLETION_PROMPT_TEMPLATE, answer,
+            interactionId = memoryClient.createInteraction(conversationId, llmQuestion, PromptUtil.getPromptTemplate(systemPrompt, userInstructions), answer,
                 GenerativeQAProcessorConstants.RESPONSE_PROCESSOR_TYPE, jsonArrayToString(searchResults));
             log.info("Created a new interaction: {} ({})", interactionId, getDuration(start));
         }
@@ -227,7 +236,18 @@ public class GenerativeQAResponseProcessor extends AbstractProcessor implements 
                         "required property can't be empty."
                     );
                 }
-                log.info("model_id {}, llm_model {}, context_field_list {}", modelId, llmModel, contextFields);
+                String systemPrompt = ConfigurationUtils.readOptionalStringProperty(GenerativeQAProcessorConstants.RESPONSE_PROCESSOR_TYPE,
+                    tag,
+                    config,
+                    GenerativeQAProcessorConstants.CONFIG_NAME_SYSTEM_PROMPT
+                );
+                String userInstructions = ConfigurationUtils.readOptionalStringProperty(GenerativeQAProcessorConstants.RESPONSE_PROCESSOR_TYPE,
+                    tag,
+                    config,
+                    GenerativeQAProcessorConstants.CONFIG_NAME_USER_INSTRUCTIONS
+                );
+                log.info("model_id {}, llm_model {}, context_field_list {}, system_prompt {}, user_instructions {}",
+                    modelId, llmModel, contextFields, systemPrompt, userInstructions);
                 return new GenerativeQAResponseProcessor(client,
                     tag,
                     description,
@@ -235,6 +255,8 @@ public class GenerativeQAResponseProcessor extends AbstractProcessor implements 
                     ModelLocator.getLlm(modelId, client),
                     llmModel,
                     contextFields,
+                    systemPrompt,
+                    userInstructions,
                     featureFlagSupplier
                 );
             } else {

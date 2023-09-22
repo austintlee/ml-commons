@@ -83,7 +83,8 @@ public class DefaultLlmImplTests extends OpenSearchTestCase {
         ActionFuture<MLOutput> future = mock(ActionFuture.class);
         when(future.actionGet(anyLong())).thenReturn(mlOutput);
         when(mlClient.predict(any(), any())).thenReturn(future);
-        ChatCompletionInput input = new ChatCompletionInput("model", "question", Collections.emptyList(), Collections.emptyList(), 0);
+        ChatCompletionInput input = new ChatCompletionInput("model", "question", Collections.emptyList(),
+            Collections.emptyList(), 0, "prompt", "instructions");
         ChatCompletionOutput output = connector.doChatCompletion(input);
         verify(mlClient, times(1)).predict(any(), captor.capture());
         MLInput mlInput = captor.getValue();

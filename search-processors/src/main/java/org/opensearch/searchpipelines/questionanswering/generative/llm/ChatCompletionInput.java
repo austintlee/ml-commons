@@ -39,4 +39,6 @@ public class ChatCompletionInput {
     private List<Interaction> chatHistory;
     private List<String> contexts;
     private int timeoutInSeconds;
+    private String systemPrompt;
+    private String userInstructions;
 }

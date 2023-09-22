@@ -91,7 +91,8 @@ public class GenerativeQAParameters implements Writeable, ToXContentObject {
     @Getter
     private Integer timeout;
 
-    public GenerativeQAParameters(String conversationId, String llmModel, String llmQuestion, Integer contextSize, Integer interactionSize, Integer timeout) {
+    public GenerativeQAParameters(String conversationId, String llmModel, String llmQuestion, Integer contextSize, Integer interactionSize,
+        Integer timeout, String promptTemplate) {
         this.conversationId = conversationId;
         this.llmModel = llmModel;
 
