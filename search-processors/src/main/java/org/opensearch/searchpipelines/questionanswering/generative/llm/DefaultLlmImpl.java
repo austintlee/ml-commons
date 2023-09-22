@@ -91,11 +91,23 @@ public class DefaultLlmImpl implements Llm {
         // TODO dataAsMap can be null or can contain information such as throttling.  Handle non-happy cases.
 
         List choices = (List) dataAsMap.get(CONNECTOR_OUTPUT_CHOICES);
-        Map firstChoiceMap = (Map) choices.get(0);
-        log.info("Choices: {}", firstChoiceMap.toString());
-        Map message = (Map) firstChoiceMap.get(CONNECTOR_OUTPUT_MESSAGE);
-        log.info("role: {}, content: {}", message.get(CONNECTOR_OUTPUT_MESSAGE_ROLE), message.get(CONNECTOR_OUTPUT_MESSAGE_CONTENT));
-
-        return new ChatCompletionOutput(List.of(message.get(CONNECTOR_OUTPUT_MESSAGE_CONTENT)));
+        List<Object> answers = null;
+        List<String> errors = null;
+        if (choices == null) {
+            /*
+             * error={message=This model's maximum context length is 4097 tokens. However, your messages resulted in 4456 tokens.
+             *                Please reduce the length of the messages.,
+             *        type=invalid_request_error, param=messages, code=context_length_exceeded}
+             */
+            Map error = (Map) dataAsMap.get("error");
+            errors = List.of((String) error.get("message"));
+        } else {
+            Map firstChoiceMap = (Map) choices.get(0);
+            log.info("Choices: {}", firstChoiceMap.toString());
+            Map message = (Map) firstChoiceMap.get(CONNECTOR_OUTPUT_MESSAGE);
+            log.info("role: {}, content: {}", message.get(CONNECTOR_OUTPUT_MESSAGE_ROLE), message.get(CONNECTOR_OUTPUT_MESSAGE_CONTENT));
+            answers = List.of(message.get(CONNECTOR_OUTPUT_MESSAGE_CONTENT));
+        }
+        return new ChatCompletionOutput(answers, errors);
     }
 }

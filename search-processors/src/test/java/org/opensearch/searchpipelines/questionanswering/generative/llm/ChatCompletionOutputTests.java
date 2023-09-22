@@ -24,13 +24,13 @@ import java.util.List;
 public class ChatCompletionOutputTests extends OpenSearchTestCase {
 
     public void testCtor() {
-        ChatCompletionOutput output = new ChatCompletionOutput(List.of("answer"));
+        ChatCompletionOutput output = new ChatCompletionOutput(List.of("answer"), null);
         assertNotNull(output);
     }
 
     public void testGettersSetters() {
         String answer = "answer";
-        ChatCompletionOutput output = new ChatCompletionOutput(List.of(answer));
+        ChatCompletionOutput output = new ChatCompletionOutput(List.of(answer), null);
         assertEquals(answer, (String) output.getAnswers().get(0));
     }
 }

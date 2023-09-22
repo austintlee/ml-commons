@@ -30,6 +30,6 @@ public class LocalLlm implements Llm {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        return new ChatCompletionOutput(List.of("This is a dummy answer."));
+        return new ChatCompletionOutput(List.of("This is a dummy answer."), null);
     }
 }

@@ -138,17 +138,28 @@ public class GenerativeQAResponseProcessor extends AbstractProcessor implements 
             llmQuestion, chatHistory, searchResults, timeout));
         log.info("doChatCompletion complete. ({})", getDuration(start));
 
-        String answer = (String) output.getAnswers().get(0);
-
+        String answer = null;
+        String errorMessage = null;
         String interactionId = null;
-        if (conversationId != null) {
-            start = Instant.now();
-            interactionId = memoryClient.createInteraction(conversationId, llmQuestion, PromptUtil.getPromptTemplate(systemPrompt, userInstructions), answer,
-                GenerativeQAProcessorConstants.RESPONSE_PROCESSOR_TYPE, jsonArrayToString(searchResults));
-            log.info("Created a new interaction: {} ({})", interactionId, getDuration(start));
+        if (output.isErrorOccurred()) {
+            errorMessage = output.getErrors().get(0);
+        } else {
+            answer = (String) output.getAnswers().get(0);
+
+            if (conversationId != null) {
+                start = Instant.now();
+                interactionId = memoryClient.createInteraction(conversationId,
+                    llmQuestion,
+                    PromptUtil.getPromptTemplate(systemPrompt, userInstructions),
+                    answer,
+                    GenerativeQAProcessorConstants.RESPONSE_PROCESSOR_TYPE,
+                    jsonArrayToString(searchResults)
+                );
+                log.info("Created a new interaction: {} ({})", interactionId, getDuration(start));
+            }
         }
 
-        return insertAnswer(response, answer, interactionId);
+        return insertAnswer(response, answer, errorMessage, interactionId);
     }
 
     long getDuration(Instant start) {
@@ -160,11 +171,11 @@ public class GenerativeQAResponseProcessor extends AbstractProcessor implements 
         return GenerativeQAProcessorConstants.RESPONSE_PROCESSOR_TYPE;
     }
 
-    private SearchResponse insertAnswer(SearchResponse response, String answer, String interactionId) {
+    private SearchResponse insertAnswer(SearchResponse response, String answer, String errorMessage, String interactionId) {
 
         // TODO return the interaction id in the response.
 
-        return new GenerativeSearchResponse(answer, response.getInternalResponse(), response.getScrollId(), response.getTotalShards(), response.getSuccessfulShards(),
+        return new GenerativeSearchResponse(answer, errorMessage, response.getInternalResponse(), response.getScrollId(), response.getTotalShards(), response.getSuccessfulShards(),
             response.getSkippedShards(), response.getSuccessfulShards(), response.getShardFailures(), response.getClusters(), interactionId);
     }
 
