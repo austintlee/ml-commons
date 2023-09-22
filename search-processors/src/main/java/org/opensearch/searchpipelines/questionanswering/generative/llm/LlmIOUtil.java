@@ -26,10 +26,11 @@ import java.util.List;
  */
 public class LlmIOUtil {
 
-    public static ChatCompletionInput createChatCompletionInput(String llmModel, String question, List<Interaction> chatHistory, List<String> contexts) {
+    public static ChatCompletionInput createChatCompletionInput(String llmModel, String question, List<Interaction> chatHistory,
+        List<String> contexts, int timeoutInSeconds) {
 
         // TODO pick the right subclass based on the modelId.
 
-        return new ChatCompletionInput(llmModel, question, chatHistory, contexts);
+        return new ChatCompletionInput(llmModel, question, chatHistory, contexts, timeoutInSeconds);
     }
 }

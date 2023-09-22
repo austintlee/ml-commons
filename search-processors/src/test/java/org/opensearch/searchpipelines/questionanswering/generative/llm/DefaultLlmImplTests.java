@@ -81,9 +81,9 @@ public class DefaultLlmImplTests extends OpenSearchTestCase {
         ModelTensor tensor = new ModelTensor("tensor", new Number[0], new long[0], MLResultDataType.STRING, null, null, dataAsMap);
         ModelTensorOutput mlOutput = new ModelTensorOutput(List.of(new ModelTensors(List.of(tensor))));
         ActionFuture<MLOutput> future = mock(ActionFuture.class);
-        when(future.actionGet()).thenReturn(mlOutput);
+        when(future.actionGet(anyLong())).thenReturn(mlOutput);
         when(mlClient.predict(any(), any())).thenReturn(future);
-        ChatCompletionInput input = new ChatCompletionInput("model", "question", Collections.emptyList(), Collections.emptyList());
+        ChatCompletionInput input = new ChatCompletionInput("model", "question", Collections.emptyList(), Collections.emptyList(), 0);
         ChatCompletionOutput output = connector.doChatCompletion(input);
         verify(mlClient, times(1)).predict(any(), captor.capture());
         MLInput mlInput = captor.getValue();

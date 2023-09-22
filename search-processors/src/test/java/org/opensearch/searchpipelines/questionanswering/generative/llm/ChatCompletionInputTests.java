@@ -32,7 +32,7 @@ public class ChatCompletionInputTests extends OpenSearchTestCase {
         String model = "model";
         String question = "question";
 
-        ChatCompletionInput input = new ChatCompletionInput(model, question, Collections.emptyList(), Collections.emptyList());
+        ChatCompletionInput input = new ChatCompletionInput(model, question, Collections.emptyList(), Collections.emptyList(), 0);
 
         assertNotNull(input);
     }
@@ -46,7 +46,7 @@ public class ChatCompletionInputTests extends OpenSearchTestCase {
                 ConversationalIndexConstants.INTERACTIONS_CREATE_TIME_FIELD, Instant.now().toString(),
                 ConversationalIndexConstants.INTERACTIONS_INPUT_FIELD, "hello")));
         List<String> contexts = List.of("result1", "result2");
-        ChatCompletionInput input = new ChatCompletionInput(model, question, history, contexts);
+        ChatCompletionInput input = new ChatCompletionInput(model, question, history, contexts, 0);
         assertEquals(model, input.getModel());
         assertEquals(question, input.getQuestion());
         assertEquals(history.get(0).getConversationId(), input.getChatHistory().get(0).getConversationId());

@@ -81,7 +81,7 @@ public class DefaultLlmImpl implements Llm {
         MLInputDataset dataset = RemoteInferenceInputDataSet.builder().parameters(inputParameters).build();
         MLInput mlInput = MLInput.builder().algorithm(FunctionName.REMOTE).inputDataset(dataset).build();
         ActionFuture<MLOutput> future = mlClient.predict(this.openSearchModelId, mlInput);
-        ModelTensorOutput modelOutput = (ModelTensorOutput) future.actionGet();
+        ModelTensorOutput modelOutput = (ModelTensorOutput) future.actionGet(chatCompletionInput.getTimeoutInSeconds() * 1000);
 
         // Response from a remote model
         Map<String, ?> dataAsMap = modelOutput.getMlModelOutputs().get(0).getMlModelTensors().get(0).getDataAsMap();

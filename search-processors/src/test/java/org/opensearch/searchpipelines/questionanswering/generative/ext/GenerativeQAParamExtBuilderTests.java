@@ -39,7 +39,7 @@ public class GenerativeQAParamExtBuilderTests extends OpenSearchTestCase {
 
     public void testCtor() throws IOException {
         GenerativeQAParamExtBuilder builder = new GenerativeQAParamExtBuilder();
-        GenerativeQAParameters parameters = new GenerativeQAParameters("conversation_id", "model_id", "question", null);
+        GenerativeQAParameters parameters = new GenerativeQAParameters("conversation_id", "model_id", "question", null, null, null);
         builder.setParams(parameters);
         assertEquals(parameters, builder.getParams());
 
@@ -79,8 +79,8 @@ public class GenerativeQAParamExtBuilderTests extends OpenSearchTestCase {
     }
 
     public void testMiscMethods() throws IOException {
-        GenerativeQAParameters param1 = new GenerativeQAParameters("a", "b", "c", null);
-        GenerativeQAParameters param2 = new GenerativeQAParameters("a", "b", "d", null);
+        GenerativeQAParameters param1 = new GenerativeQAParameters("a", "b", "c", null, null, null);
+        GenerativeQAParameters param2 = new GenerativeQAParameters("a", "b", "d", null, null, null);
         GenerativeQAParamExtBuilder builder1 = new GenerativeQAParamExtBuilder();
         GenerativeQAParamExtBuilder builder2 = new GenerativeQAParamExtBuilder();
         builder1.setParams(param1);
@@ -105,7 +105,7 @@ public class GenerativeQAParamExtBuilderTests extends OpenSearchTestCase {
     }
 
     public void testXContentRoundTrip() throws IOException {
-        GenerativeQAParameters param1 = new GenerativeQAParameters("a", "b", "c", null);
+        GenerativeQAParameters param1 = new GenerativeQAParameters("a", "b", "c", null, null, null);
         GenerativeQAParamExtBuilder extBuilder = new GenerativeQAParamExtBuilder();
         extBuilder.setParams(param1);
         XContentType xContentType = randomFrom(XContentType.values());
@@ -116,7 +116,7 @@ public class GenerativeQAParamExtBuilderTests extends OpenSearchTestCase {
     }
 
     public void testStreamRoundTrip() throws IOException {
-        GenerativeQAParameters param1 = new GenerativeQAParameters("a", "b", "c", null);
+        GenerativeQAParameters param1 = new GenerativeQAParameters("a", "b", "c", null, null, null);
         GenerativeQAParamExtBuilder extBuilder = new GenerativeQAParamExtBuilder();
         extBuilder.setParams(param1);
         BytesStreamOutput bso = new BytesStreamOutput();

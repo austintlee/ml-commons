@@ -59,6 +59,8 @@ public class GenerativeQAResponseProcessor extends AbstractProcessor implements 
 
     private static final int DEFAULT_CHAT_HISTORY_WINDOW = 10;
 
+    private static final int MAX_PROCESSOR_TIME_IN_SECONDS = 60;
+
     // TODO Add "interaction_count".  This is how far back in chat history we want to go back when calling LLM.
 
     private final String llmModel;
@@ -94,6 +96,13 @@ public class GenerativeQAResponseProcessor extends AbstractProcessor implements 
         }
 
         GenerativeQAParameters params = GenerativeQAParamUtil.getGenerativeQAParameters(request);
+
+        Integer timeout = params.getTimeout();
+        if (timeout == null || timeout == GenerativeQAParameters.SIZE_NULL_VALUE) {
+            timeout = MAX_PROCESSOR_TIME_IN_SECONDS;
+        }
+        log.info("Timeout for this request: {} seconds.", timeout);
+
         String llmQuestion = params.getLlmQuestion();
         String llmModel = params.getLlmModel() == null ? this.llmModel : params.getLlmModel();
         if (llmModel == null) {
@@ -102,17 +111,22 @@ public class GenerativeQAResponseProcessor extends AbstractProcessor implements 
         String conversationId = params.getConversationId();
         log.info("LLM question: {}, LLM model {}, conversation id: {}", llmQuestion, llmModel, conversationId);
         Instant start = Instant.now();
-        List<Interaction> chatHistory = (conversationId == null) ? Collections.emptyList() : memoryClient.getInteractions(conversationId, DEFAULT_CHAT_HISTORY_WINDOW);
+        Integer interactionSize = params.getInteractionSize();
+        if (interactionSize == null || interactionSize == GenerativeQAParameters.SIZE_NULL_VALUE) {
+            interactionSize = DEFAULT_CHAT_HISTORY_WINDOW;
+        }
+        log.info("Using interaction size of {}", interactionSize);
+        List<Interaction> chatHistory = (conversationId == null) ? Collections.emptyList() : memoryClient.getInteractions(conversationId, interactionSize);
         log.info("Retrieved chat history. ({})", getDuration(start));
 
         Integer topN = params.getContextSize();
         if (topN == null) {
-            topN = GenerativeQAParameters.CONTEXT_SIZE_NULL_VALUE;
+            topN = GenerativeQAParameters.SIZE_NULL_VALUE;
         }
         List<String> searchResults = getSearchResults(response, topN);
 
         start = Instant.now();
-        ChatCompletionOutput output = llm.doChatCompletion(LlmIOUtil.createChatCompletionInput(llmModel, llmQuestion, chatHistory, searchResults));
+        ChatCompletionOutput output = llm.doChatCompletion(LlmIOUtil.createChatCompletionInput(llmModel, llmQuestion, chatHistory, searchResults, timeout));
         log.info("doChatCompletion complete. ({})", getDuration(start));
 
         String answer = (String) output.getAnswers().get(0);
@@ -149,7 +163,7 @@ public class GenerativeQAResponseProcessor extends AbstractProcessor implements 
         List<String> searchResults = new ArrayList<>();
         SearchHit[] hits = response.getHits().getHits();
         int total = hits.length;
-        int end = (topN != GenerativeQAParameters.CONTEXT_SIZE_NULL_VALUE) ? Math.min(topN, total) : total;
+        int end = (topN != GenerativeQAParameters.SIZE_NULL_VALUE) ? Math.min(topN, total) : total;
         for (int i = 0; i < end; i++) {
             Map<String, Object> docSourceMap = hits[i].getSourceAsMap();
             for (String contextField : contextFields) {
