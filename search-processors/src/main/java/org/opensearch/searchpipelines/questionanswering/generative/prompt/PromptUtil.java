@@ -94,8 +94,7 @@ public class PromptUtil {
         // TODO better prompt template management is needed here.
 
         if (Strings.isNullOrEmpty(systemPrompt) && Strings.isNullOrEmpty(userInstructions)) {
-            // You should not reach here since we use the default prompt.
-            throw new RuntimeException("systemPrompt and userInstructions can't both be empty.");
+            systemPrompt = DEFAULT_SYSTEM_PROMPT;
         }
 
         JsonArray messageArray = new JsonArray();
