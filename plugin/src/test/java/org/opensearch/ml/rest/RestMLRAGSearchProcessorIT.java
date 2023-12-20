@@ -171,6 +171,8 @@ public class RestMLRAGSearchProcessorIT extends RestMLRemoteInferenceIT {
         + "      \"generative_qa_parameters\": {\n"
         + "        \"llm_model\": \"%s\",\n"
         + "        \"llm_question\": \"%s\",\n"
+        + "        \"system_prompt\": \"%s\",\n"
+        + "        \"user_instructions\": \"%s\",\n"
         + "        \"context_size\": %d,\n"
         + "        \"interaction_size\": %d,\n"
         + "        \"timeout\": %d\n"
@@ -188,6 +190,8 @@ public class RestMLRAGSearchProcessorIT extends RestMLRemoteInferenceIT {
         + "        \"llm_model\": \"%s\",\n"
         + "        \"llm_question\": \"%s\",\n"
         + "        \"conversation_id\": \"%s\",\n"
+        + "        \"system_prompt\": \"%s\",\n"
+        + "        \"user_instructions\": \"%s\",\n"
         + "        \"context_size\": %d,\n"
         + "        \"interaction_size\": %d,\n"
         + "        \"timeout\": %d\n"
@@ -306,6 +310,8 @@ public class RestMLRAGSearchProcessorIT extends RestMLRemoteInferenceIT {
         requestParameters.match = "president";
         requestParameters.llmModel = OPENAI_MODEL;
         requestParameters.llmQuestion = "who is lincoln";
+        requestParameters.systemPrompt = "You are great at answering questions";
+        requestParameters.userInstructions = "Follow my instructions as best you can";
         requestParameters.contextSize = 5;
         requestParameters.interactionSize = 5;
         requestParameters.timeout = 60;
@@ -525,6 +531,8 @@ public class RestMLRAGSearchProcessorIT extends RestMLRemoteInferenceIT {
                     requestParameters.match,
                     requestParameters.llmModel,
                     requestParameters.llmQuestion,
+                    requestParameters.systemPrompt,
+                    requestParameters.userInstructions,
                     requestParameters.contextSize,
                     requestParameters.interactionSize,
                     requestParameters.timeout
@@ -539,6 +547,8 @@ public class RestMLRAGSearchProcessorIT extends RestMLRemoteInferenceIT {
                     requestParameters.llmModel,
                     requestParameters.llmQuestion,
                     requestParameters.conversationId,
+                    requestParameters.systemPrompt,
+                    requestParameters.userInstructions,
                     requestParameters.contextSize,
                     requestParameters.interactionSize,
                     requestParameters.timeout
@@ -579,6 +589,8 @@ public class RestMLRAGSearchProcessorIT extends RestMLRemoteInferenceIT {
         String match;
         String llmModel;
         String llmQuestion;
+        String systemPrompt;
+        String userInstructions;
         int contextSize;
         int interactionSize;
         int timeout;
