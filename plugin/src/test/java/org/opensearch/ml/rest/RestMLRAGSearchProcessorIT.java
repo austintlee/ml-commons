@@ -189,7 +189,7 @@ public class RestMLRAGSearchProcessorIT extends RestMLRemoteInferenceIT {
         + "      \"generative_qa_parameters\": {\n"
         + "        \"llm_model\": \"%s\",\n"
         + "        \"llm_question\": \"%s\",\n"
-        + "        \"conversation_id\": \"%s\",\n"
+        + "        \"memory_id\": \"%s\",\n"
         + "        \"system_prompt\": \"%s\",\n"
         + "        \"user_instructions\": \"%s\",\n"
         + "        \"context_size\": %d,\n"
