@@ -143,6 +143,18 @@ public class GenerativeQAResponseProcessor extends AbstractProcessor implements 
         }
         List<String> searchResults = getSearchResults(response, topN);
 
+        // See if the prompt is being overridden at the request level.
+        String effectiveSystemPrompt = systemPrompt;
+        String effectiveUserInstructions = userInstructions;
+        if (params.getSystemPrompt() != null) {
+            effectiveSystemPrompt = params.getSystemPrompt();
+        }
+        if (params.getUserInstructions() != null) {
+            effectiveUserInstructions = params.getUserInstructions();
+        }
+        log.info("system_prompt: {}", effectiveSystemPrompt);
+        log.info("user_instructions: {}", effectiveUserInstructions);
+
         start = Instant.now();
         try {
             ChatCompletionOutput output = llm
