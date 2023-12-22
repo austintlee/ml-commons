@@ -160,7 +160,7 @@ public class GenerativeQAResponseProcessor extends AbstractProcessor implements 
         ChatCompletionOutput output = llm
             .doChatCompletion(
                 LlmIOUtil
-                    .createChatCompletionInput(systemPrompt, userInstructions, llmModel, llmQuestion, chatHistory, searchResults, timeout)
+                    .createChatCompletionInput(effectiveSystemPrompt, effectiveUserInstructions, llmModel, llmQuestion, chatHistory, searchResults, timeout)
             );
         log.info("doChatCompletion complete. ({})", getDuration(start));
 
@@ -178,7 +178,7 @@ public class GenerativeQAResponseProcessor extends AbstractProcessor implements 
                     .createInteraction(
                         conversationId,
                         llmQuestion,
-                        PromptUtil.getPromptTemplate(systemPrompt, userInstructions),
+                        PromptUtil.getPromptTemplate(effectiveSystemPrompt, effectiveUserInstructions),
                         answer,
                         GenerativeQAProcessorConstants.RESPONSE_PROCESSOR_TYPE,
                         jsonArrayToString(searchResults)
