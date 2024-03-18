@@ -29,13 +29,13 @@ import org.opensearch.core.xcontent.ObjectParser;
 import org.opensearch.core.xcontent.ToXContentObject;
 import org.opensearch.core.xcontent.XContentBuilder;
 import org.opensearch.core.xcontent.XContentParser;
+import org.opensearch.searchpipelines.questionanswering.generative.GenerativeQAProcessorConstants;
 
 import com.google.common.base.Preconditions;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.opensearch.searchpipelines.questionanswering.generative.GenerativeQAProcessorConstants;
 
 /**
  * Defines parameters for generative QA search pipelines.
@@ -73,7 +73,7 @@ public class GenerativeQAParameters implements Writeable, ToXContentObject {
 
     private static final ParseField SYSTEM_PROMPT = new ParseField(GenerativeQAProcessorConstants.CONFIG_NAME_SYSTEM_PROMPT);
 
-    private static final ParseField USER_INSTRUCTIONS =  new ParseField(GenerativeQAProcessorConstants.CONFIG_NAME_USER_INSTRUCTIONS);
+    private static final ParseField USER_INSTRUCTIONS = new ParseField(GenerativeQAProcessorConstants.CONFIG_NAME_USER_INSTRUCTIONS);
 
     public static final int SIZE_NULL_VALUE = -1;
 

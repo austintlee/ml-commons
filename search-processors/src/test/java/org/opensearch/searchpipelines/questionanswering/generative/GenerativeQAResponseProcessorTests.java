@@ -106,8 +106,16 @@ public class GenerativeQAResponseProcessorTests extends OpenSearchTestCase {
 
         SearchRequest request = new SearchRequest(); // mock(SearchRequest.class);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder(); // mock(SearchSourceBuilder.class);
-        GenerativeQAParameters params = new GenerativeQAParameters("12345", "llm_model", "You are kind.",
-            "system_prompt", "user_instructions", null, null, null);
+        GenerativeQAParameters params = new GenerativeQAParameters(
+            "12345",
+            "llm_model",
+            "You are kind.",
+            "system_prompt",
+            "user_instructions",
+            null,
+            null,
+            null
+        );
         GenerativeQAParamExtBuilder extBuilder = new GenerativeQAParamExtBuilder();
         extBuilder.setParams(params);
         request.source(sourceBuilder);
@@ -171,8 +179,16 @@ public class GenerativeQAResponseProcessorTests extends OpenSearchTestCase {
 
         SearchRequest request = new SearchRequest();
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-        GenerativeQAParameters params = new GenerativeQAParameters("12345", "llm_model", "You are kind.",
-            "system_promt", "user_insturctions", null, null, null);
+        GenerativeQAParameters params = new GenerativeQAParameters(
+            "12345",
+            "llm_model",
+            "You are kind.",
+            "system_promt",
+            "user_insturctions",
+            null,
+            null,
+            null
+        );
         GenerativeQAParamExtBuilder extBuilder = new GenerativeQAParamExtBuilder();
         extBuilder.setParams(params);
         request.source(sourceBuilder);
@@ -247,8 +263,16 @@ public class GenerativeQAResponseProcessorTests extends OpenSearchTestCase {
         SearchRequest request = new SearchRequest();
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
         int contextSize = 5;
-        GenerativeQAParameters params = new GenerativeQAParameters("12345", "llm_model", "You are kind.",
-            "system_prompt", "user_instructions", contextSize, null, null);
+        GenerativeQAParameters params = new GenerativeQAParameters(
+            "12345",
+            "llm_model",
+            "You are kind.",
+            "system_prompt",
+            "user_instructions",
+            contextSize,
+            null,
+            null
+        );
         GenerativeQAParamExtBuilder extBuilder = new GenerativeQAParamExtBuilder();
         extBuilder.setParams(params);
         request.source(sourceBuilder);
@@ -322,8 +346,16 @@ public class GenerativeQAResponseProcessorTests extends OpenSearchTestCase {
 
         SearchRequest request = new SearchRequest();
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-        GenerativeQAParameters params = new GenerativeQAParameters("12345", "llm_model", "You are kind.",
-            "system_prompt", "user_instructions", null, null, null);
+        GenerativeQAParameters params = new GenerativeQAParameters(
+            "12345",
+            "llm_model",
+            "You are kind.",
+            "system_prompt",
+            "user_instructions",
+            null,
+            null,
+            null
+        );
         GenerativeQAParamExtBuilder extBuilder = new GenerativeQAParamExtBuilder();
         extBuilder.setParams(params);
         request.source(sourceBuilder);

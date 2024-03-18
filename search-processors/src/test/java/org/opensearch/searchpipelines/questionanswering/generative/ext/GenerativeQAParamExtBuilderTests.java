@@ -39,8 +39,16 @@ public class GenerativeQAParamExtBuilderTests extends OpenSearchTestCase {
 
     public void testCtor() throws IOException {
         GenerativeQAParamExtBuilder builder = new GenerativeQAParamExtBuilder();
-        GenerativeQAParameters parameters = new GenerativeQAParameters("conversation_id", "model_id", "question", "system_promtp",
-            "user_instructions", null, null, null);
+        GenerativeQAParameters parameters = new GenerativeQAParameters(
+            "conversation_id",
+            "model_id",
+            "question",
+            "system_promtp",
+            "user_instructions",
+            null,
+            null,
+            null
+        );
         builder.setParams(parameters);
         assertEquals(parameters, builder.getParams());
 
