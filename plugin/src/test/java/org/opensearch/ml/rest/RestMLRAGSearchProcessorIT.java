@@ -174,7 +174,7 @@ public class RestMLRAGSearchProcessorIT extends RestMLRemoteInferenceIT {
         + "        \"system_prompt\": \"%s\",\n"
         + "        \"user_instructions\": \"%s\",\n"
         + "        \"context_size\": %d,\n"
-        + "        \"interaction_size\": %d,\n"
+        + "        \"message_size\": %d,\n"
         + "        \"timeout\": %d\n"
         + "      }\n"
         + "  }\n"
@@ -193,7 +193,7 @@ public class RestMLRAGSearchProcessorIT extends RestMLRemoteInferenceIT {
         + "        \"system_prompt\": \"%s\",\n"
         + "        \"user_instructions\": \"%s\",\n"
         + "        \"context_size\": %d,\n"
-        + "        \"interaction_size\": %d,\n"
+        + "        \"message_size\": %d,\n"
         + "        \"timeout\": %d\n"
         + "      }\n"
         + "  }\n"
@@ -212,6 +212,7 @@ public class RestMLRAGSearchProcessorIT extends RestMLRemoteInferenceIT {
     @Before
     public void init() throws Exception {
 
+        /*
         Response response = TestHelper
             .makeRequest(
                 client(),
@@ -222,7 +223,7 @@ public class RestMLRAGSearchProcessorIT extends RestMLRemoteInferenceIT {
                 ImmutableList.of(new BasicHeader(HttpHeaders.USER_AGENT, DEFAULT_USER_AGENT))
             );
         assertEquals(200, response.getStatusLine().getStatusCode());
-
+        
         response = TestHelper
             .makeRequest(
                 client(),
@@ -233,8 +234,9 @@ public class RestMLRAGSearchProcessorIT extends RestMLRemoteInferenceIT {
                 ImmutableList.of(new BasicHeader(HttpHeaders.USER_AGENT, DEFAULT_USER_AGENT))
             );
         assertEquals(200, response.getStatusLine().getStatusCode());
+        */
 
-        response = TestHelper
+        Response response = TestHelper
             .makeRequest(
                 client(),
                 "PUT",
@@ -434,7 +436,7 @@ public class RestMLRAGSearchProcessorIT extends RestMLRemoteInferenceIT {
         String answer = (String) rag.get("answer");
         assertNotNull(answer);
 
-        String interactionId = (String) rag.get("interaction_id");
+        String interactionId = (String) rag.get("message_id");
         assertNotNull(interactionId);
     }
 
@@ -491,7 +493,7 @@ public class RestMLRAGSearchProcessorIT extends RestMLRemoteInferenceIT {
         String answer = (String) rag.get("answer");
         assertNotNull(answer);
 
-        String interactionId = (String) rag.get("interaction_id");
+        String interactionId = (String) rag.get("message_id");
         assertNotNull(interactionId);
     }
 
@@ -567,12 +569,12 @@ public class RestMLRAGSearchProcessorIT extends RestMLRemoteInferenceIT {
         Response response = makeRequest(
             client(),
             "POST",
-            "/_plugins/_ml/memory/conversation",
+            "/_plugins/_ml/memory",
             null,
             toHttpEntity(String.format(Locale.ROOT, "{\"name\": \"%s\"}", name)),
             ImmutableList.of(new BasicHeader(HttpHeaders.USER_AGENT, DEFAULT_USER_AGENT))
         );
-        return (String) ((Map) parseResponseToMap(response)).get("conversation_id");
+        return (String) ((Map) parseResponseToMap(response)).get("memory_id");
     }
 
     static class PipelineParameters {
